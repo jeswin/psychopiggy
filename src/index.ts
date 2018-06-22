@@ -1,4 +1,5 @@
 import pg = require("pg");
+export { default as Params } from "pg-params";
 
 export interface IDbConfig {
   database: string;
@@ -8,28 +9,81 @@ export interface IDbConfig {
   password: string;
 }
 
-const pools: [IDbConfig, pg.Pool][] = [];
-let defaultConfig: IDbConfig;
+let pools: [string, pg.Pool][] = [];
+let configStringCache: [IDbConfig, string][] = [];
 
-export function createPool(dbConfig: IDbConfig) {
-  const pool = new pg.Pool(dbConfig);
-  pools.push([dbConfig, pool]);
+function configToString(config: IDbConfig) {
+  return `${config.user}:${config.host}:${config.port}:${config.database}`;
 }
 
-export function setDefaultConfig(dbConfig: IDbConfig) {
-  defaultConfig = dbConfig;
+function addToConfigStringCache(config: IDbConfig, strConfig: string) {
+  configStringCache.push([config, strConfig]);
 }
 
-export function getPool(dbConfig: IDbConfig = defaultConfig): pg.Pool {
-  if (dbConfig) {
-    const pool = pools.find(x => x[0] === dbConfig);
+function findConfigString(config: IDbConfig) {
+  const result = configStringCache.find(x => x[0] === config);
+  if (result) {
+    return result[1];
+  }
+}
+
+function removeFromConfigStringCache(param: IDbConfig | string) {
+  if (typeof param === "string") {
+    configStringCache = configStringCache.filter(x => x[1] !== param);
+  } else {
+    configStringCache = configStringCache.filter(x => x[0] !== param);
+  }
+}
+
+function removeFromPool(pool: pg.Pool) {
+  pools = pools.filter(x => x[1] !== pool);
+}
+
+export function createPool(config: IDbConfig) {
+  const configString = configToString(config);
+  if (configStringCache.every(x => x[1] !== configString)) {
+    const pool = new pg.Pool(config);
+    addToConfigStringCache(config, configString);
+    pools.push([configString, pool]);
+  }
+}
+
+export function getPool(maybeConfig?: IDbConfig): pg.Pool {
+  if (maybeConfig) {
+    const config = maybeConfig;
+    const strConfig = findConfigString(config) || configToString(config);
+    const pool = pools.find(x => x[0] === strConfig);
     if (pool) {
       return pool[1];
     } else {
       throw new Error(
-        `No matching pool found for ${dbConfig.user}@${dbConfig.host}:${
-          dbConfig.port
-        }/${dbConfig.database}`
+        `No matching pool found for ${config.user}@${config.host}:${
+          config.port
+        }/${config.database}`
+      );
+    }
+  } else {
+    if (pools.length === 1) {
+      return pools[0][1];
+    } else {
+      throw new Error(`Pass the configuration corresponding to the db.`);
+    }
+  }
+}
+
+export async function endPool(config: IDbConfig) {
+  if (config) {
+    const strConfig = findConfigString(config) || configToString(config);
+    const pool = pools.find(x => x[0] === strConfig);
+    if (pool) {
+      await pool[1].end();
+      removeFromConfigStringCache(config);
+      removeFromPool(pool[1]);
+    } else {
+      throw new Error(
+        `No matching pool found for ${config.user}@${config.host}:${
+          config.port
+        }/${config.database}`
       );
     }
   } else {
@@ -37,11 +91,23 @@ export function getPool(dbConfig: IDbConfig = defaultConfig): pg.Pool {
   }
 }
 
+export async function endPools() {
+  for (const pool of pools) {
+    await pool[1].end();
+    removeFromConfigStringCache(pool[0]);
+    removeFromPool(pool[1]);
+  }
+}
+
+export function internalNumPools() {
+  return pools.length;
+}
+
 export async function withClient<T>(
   fn: (client: pg.PoolClient) => Promise<T | undefined>,
-  dbConfig: IDbConfig = defaultConfig
+  maybeConfig?: IDbConfig
 ): Promise<T | undefined> {
-  const pool = getPool(dbConfig);
+  const pool = getPool(maybeConfig);
   const client = await pool.connect();
   const result = await fn(client);
   client.release();
@@ -50,7 +116,7 @@ export async function withClient<T>(
 
 export async function withTransaction<T>(
   fn: (client: pg.PoolClient) => Promise<T | undefined>,
-  dbConfig: IDbConfig = defaultConfig
+  maybeConfig?: IDbConfig
 ): Promise<T | undefined> {
   return await withClient(async (client: pg.PoolClient) => {
     await client.query("BEGIN");
@@ -63,9 +129,5 @@ export async function withTransaction<T>(
     }
 
     return result;
-  }, dbConfig);
-}
-
-export async function shutdownPools() {
-  await Promise.all(pools.map(p => p[1].end()));
+  }, maybeConfig);
 }

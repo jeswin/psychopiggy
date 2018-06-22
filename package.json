@@ -1,5 +1,5 @@
 {
-  "name": "pg-easy",
+  "name": "pg-pack",
   "version": "0.0.1",
   "author": "Jeswin Kumar<jeswinpk@agilehead.com>",
   "main": "dist/index.js",
@@ -10,7 +10,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@types/node": "^10.0.6"
+    "@types/node": "^10.0.6",
+    "pg-params": "^0.0.4"
   },
   "devDependencies": {
     "@types/mocha": "^5.2.0",
