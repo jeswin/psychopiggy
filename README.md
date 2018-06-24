@@ -1,33 +1,76 @@
-# piggies
+# psychopiggy
 
-pg doesn't support named parameters, to keep things lightweight and simple.
-However, that makes queries brittle.
+Psychopiggy is a thin wrapper around the excellent 'pg' module.
 
-piggies contains helper methods to make parameterized queries easier.
+Adds these features:
+
+- Named parameters
+- Release clients automatically
+- Avoid transaction boilerplate
 
 ## Installation
 
 ```bash
-npm install piggies
+npm install psychopiggy
 ```
 
 ## Usage
 
-Here's an example.
+Here's how to run a simple query
 
 ```js
-import Params from "piggies";
+import * as pg from "psychopiggy";
 
-const params = Params({
-  name: "jeswin",
-  country: "india"
-});
+// connection config
+const config = {
+  database: "dbname",
+  host: "hostname",
+  user: "dbusername",
+  password: "password",
+  port: 5432
+};
 
-const queryText = `
-  SELECT * FROM user WHERE 
-  name=${params.key("name")} AND 
-  country=${params.key("country")}`;
-
-client.query(queryText, params.values());
+// Using pools.
+async function createAccount() {
+  pg.createPool(config);
+  const pool = pg.getPool(config);
+  const { rows } = await pool.query(
+    `INSERT INTO account (
+    username, password, email) VALUES ('jeswin', 'secretive', 'jeswin@example.com')`
+  );
+}
 ```
 
+Prepared Statements
+
+```js
+async function createAccount() {
+  const pool = pg.getPool(config);
+  const params = new pg.Params({
+    email: "jeswin@example.com",
+    password: "secretive",
+    username: "jeswin"
+  });
+  const { rows } = await pool.query(
+    `INSERT INTO account (${params.columns()}) VALUES (${params.ids()})`,
+    params.values()
+  );
+}
+```
+
+Transactions. If there's an exception, everything within the transaction is rolled back automatically.
+
+```js
+async addTwoUsers() {
+  pg.createPool(config);
+
+  const pool = pg.getPool(config);
+
+  await pg.withTransaction(async client => {
+    await client.query(`INSERT INTO account (
+      username, password, email) VALUES ('user1', 'secretive1', 'user1@example.com')`);
+    await client.query(`INSERT INTO account (
+      username, password, email) VALUES ('user2', 'secretive2', 'user2@example.com')`);
+  }, config);
+}
+```
