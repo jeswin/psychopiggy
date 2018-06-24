@@ -5,8 +5,8 @@ Psychopiggy is a thin wrapper around the excellent 'pg' module.
 Adds these features:
 
 - Named parameters
-- Release clients automatically
-- Avoid transaction boilerplate
+- Releases clients automatically
+- Avoids transaction boilerplate
 
 ## Installation
 
