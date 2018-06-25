@@ -87,7 +87,7 @@ export async function endPool(config: IDbConfig) {
       );
     }
   } else {
-    throw new Error(`A default connection pool was not specified.`);
+    throw new Error(`Pass the configuration corresponding to the db.`);
   }
 }
 
