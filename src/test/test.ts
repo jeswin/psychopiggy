@@ -69,11 +69,6 @@ describe("psychopiggy", () => {
     await psychopiggy.endPools();
   });
 
-  // after(async () => {
-  //   await sleep(1000);
-  //   process.exit();
-  // });
-
   it("returns Params", async () => {
     const params = new psychopiggy.Params({ username: "jeswin" });
     shouldLib.exist(params);
