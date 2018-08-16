@@ -1,11 +1,10 @@
 {
   "name": "psychopiggy",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "author": "Jeswin Kumar<jeswinpk@agilehead.com>",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "./build.sh",
     "test": "./build.sh && mocha dist/test/test.js"
   },
   "license": "MIT",
