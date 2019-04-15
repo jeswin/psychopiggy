@@ -124,6 +124,7 @@ export async function withTransaction<T>(
     let result: T | undefined;
     try {
       result = await fn(client);
+      await client.query("COMMIT");
     } catch {
       await client.query("ROLLBACK");
     }

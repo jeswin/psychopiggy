@@ -153,7 +153,9 @@ describe("psychopiggy", () => {
 
     await psychopiggy.withTransaction(async client => {
       await client.query(`INSERT INTO account (
-        username, password, email) VALUES ('jeswin1', 'secretive', 'jeswin1@example.com')`);
+        username, password, email) VALUES ('jeswin1', 'secretive1', 'jeswin1@example.com')`);
+      await client.query(`INSERT INTO account (
+          username, password, email) VALUES ('jeswin2', 'secretive2', 'jeswin2@example.com')`);
     }, config);
 
     const result = (await psychopiggy.withClient(async client => {
@@ -162,9 +164,10 @@ describe("psychopiggy", () => {
 
     shouldLib.exist(result);
 
-    result.rows.length.should.equal(2);
+    result.rows.length.should.equal(3);
     result.rows[0].username.should.equal("jeswin");
     result.rows[1].username.should.equal("jeswin1");
+    result.rows[2].username.should.equal("jeswin2");
   });
 
   it("rolls back an erroring transaction", async () => {
