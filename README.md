@@ -41,7 +41,22 @@ async function createAccount() {
 }
 ```
 
-Prepared Statements
+A simple Select query
+
+```js
+async function getUsers() {
+  const pool = pg.getPool(config);
+  const params = new pg.Params({
+    username: "jeswin"
+  });
+  const { rows } = await pool.query(
+    `SELECT * FROM "appusers" WHERE username=${params.id("username")}`,
+    params.values()
+  );
+}
+```
+
+Insert Statements
 
 ```js
 async function createAccount() {
