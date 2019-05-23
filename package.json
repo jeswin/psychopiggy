@@ -1,6 +1,6 @@
 {
   "name": "psychopiggy",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "Jeswin Kumar<jeswinpk@agilehead.com>",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -7,13 +7,16 @@ export interface IDbConfig {
   port: number;
   user: string;
   password: string;
+  ssl?: boolean;
 }
 
 let pools: [string, pg.Pool][] = [];
 let configStringCache: [IDbConfig, string][] = [];
 
 function configToString(config: IDbConfig) {
-  return `${config.user}:${config.host}:${config.port}:${config.database}`;
+  return `${config.user}:${config.host}:${config.port}:${config.database}${
+    typeof config.ssl !== "undefined" ? `:ssl-${config.ssl}` : ""
+  }`;
 }
 
 function addToConfigStringCache(config: IDbConfig, strConfig: string) {
