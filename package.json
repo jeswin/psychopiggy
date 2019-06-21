@@ -1,6 +1,6 @@
 {
   "name": "psychopiggy",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "author": "Jeswin Kumar<jeswinpk@agilehead.com>",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,7 +12,7 @@
     "@types/node": "^11.13.4",
     "@types/pg": "^7.4.14",
     "pg": "^7.9.0",
-    "pg-params": "^0.0.6"
+    "pg-params": "^1.0.0"
   },
   "devDependencies": {
     "@types/mocha": "^5.2.6",
