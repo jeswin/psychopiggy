@@ -6,13 +6,9 @@
   version "5.2.7"
   resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-5.2.7.tgz#315d570ccb56c53452ff8638738df60726d5b6ea"
 
-"@types/node@*":
-  version "11.13.4"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-11.13.4.tgz#f83ec3c3e05b174b7241fadeb6688267fe5b22ca"
-
-"@types/node@^11.13.4":
-  version "11.13.14"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-11.13.14.tgz#03e9416f7d699d71742e5a1e455def7bd55f8fb9"
+"@types/node@*", "@types/node@^12.0.8":
+  version "12.0.8"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.0.8.tgz#551466be11b2adc3f3d47156758f610bd9f6b1d8"
 
 "@types/pg-types@*":
   version "1.11.4"
@@ -272,8 +268,8 @@ inflight@^1.0.4:
     wrappy "1"
 
 inherits@2:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.3.tgz#633c2c83e3da42a502f52466022480f4208261de"
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.4.tgz#0fa2c64f932917c3433a0ded55363aae37416b7c"
 
 invert-kv@^2.0.0:
   version "2.0.0"
@@ -532,9 +528,9 @@ pg-int8@1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/pg-int8/-/pg-int8-1.0.1.tgz#943bd463bf5b71b4170115f80f8efc9a0c0eb78c"
 
-pg-params@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/pg-params/-/pg-params-1.0.0.tgz#ef9bc4f7f7088be5a43bcae770a40284f380fe8e"
+pg-params@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/pg-params/-/pg-params-1.0.1.tgz#ef3efa7097d14c1e1382a7f24f6389c98bc3b5f8"
 
 pg-pool@^2.0.4:
   version "2.0.6"
