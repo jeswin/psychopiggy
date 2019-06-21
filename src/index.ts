@@ -107,9 +107,9 @@ export function internalNumPools() {
 }
 
 export async function withClient<T>(
-  fn: (client: pg.PoolClient) => Promise<T | undefined>,
+  fn: (client: pg.PoolClient) => Promise<T>,
   maybeConfig?: IDbConfig
-): Promise<T | undefined> {
+): Promise<T> {
   const pool = getPool(maybeConfig);
   const client = await pool.connect();
   const result = await fn(client);
@@ -117,21 +117,25 @@ export async function withClient<T>(
   return result;
 }
 
+export type TransactionResult<T> =
+  | { success: true; value: T }
+  | { success: false; error: any };
+
 export async function withTransaction<T>(
-  fn: (client: pg.PoolClient) => Promise<T | undefined>,
+  fn: (client: pg.PoolClient) => Promise<T>,
   maybeConfig?: IDbConfig
-): Promise<T | undefined> {
+): Promise<TransactionResult<T>> {
   return await withClient(async (client: pg.PoolClient) => {
     await client.query("BEGIN");
 
-    let result: T | undefined;
+    let value: T;
     try {
-      result = await fn(client);
+      value = await fn(client);
       await client.query("COMMIT");
-    } catch {
+      return { success: true as true, value };
+    } catch (error) {
       await client.query("ROLLBACK");
+      return { success: false as false, error };
     }
-
-    return result;
   }, maybeConfig);
 }

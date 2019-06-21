@@ -179,10 +179,9 @@ describe("psychopiggy", () => {
       username, password, email) VALUES ('jeswin', 'secretive', 'jeswin@example.com')`
     );
 
-    await psychopiggy.withTransaction(async client => {
-      client.query(`INSERT INTO account (
-        username, password, email) VALUES ('jeswin1', 'secretive', 'jeswin1@example.com')`);
-      throw new Error();
+    const txResult = await psychopiggy.withTransaction(async client => {
+      return client.query(`INSERT INTO account (
+        username, password, email) VALUES ('jeswin', 'secretive', 'jpk@example.com')`);
     }, config);
 
     const result = (await psychopiggy.withClient(async client => {
@@ -191,6 +190,7 @@ describe("psychopiggy", () => {
 
     shouldLib.exist(result);
 
+    txResult.success.should.be.false();
     result.rows.length.should.equal(1);
     result.rows[0].username.should.equal("jeswin");
   });
