@@ -1,2 +1,2 @@
 rm -rf dist
-tsc
+npx tsc

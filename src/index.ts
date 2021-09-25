@@ -1,4 +1,4 @@
-import pg = require("pg");
+import pg from "pg";
 export { default as Params } from "pg-params";
 
 export interface IDbConfig {
@@ -24,7 +24,7 @@ function addToConfigStringCache(config: IDbConfig, strConfig: string) {
 }
 
 function findConfigString(config: IDbConfig) {
-  const result = configStringCache.find(x => x[0] === config);
+  const result = configStringCache.find((x) => x[0] === config);
   if (result) {
     return result[1];
   }
@@ -32,19 +32,19 @@ function findConfigString(config: IDbConfig) {
 
 function removeFromConfigStringCache(param: IDbConfig | string) {
   if (typeof param === "string") {
-    configStringCache = configStringCache.filter(x => x[1] !== param);
+    configStringCache = configStringCache.filter((x) => x[1] !== param);
   } else {
-    configStringCache = configStringCache.filter(x => x[0] !== param);
+    configStringCache = configStringCache.filter((x) => x[0] !== param);
   }
 }
 
 function removeFromPool(pool: pg.Pool) {
-  pools = pools.filter(x => x[1] !== pool);
+  pools = pools.filter((x) => x[1] !== pool);
 }
 
 export function createPool(config: IDbConfig) {
   const configString = configToString(config);
-  if (configStringCache.every(x => x[1] !== configString)) {
+  if (configStringCache.every((x) => x[1] !== configString)) {
     const pool = new pg.Pool(config);
     addToConfigStringCache(config, configString);
     pools.push([configString, pool]);
@@ -55,14 +55,12 @@ export function getPool(maybeConfig?: IDbConfig): pg.Pool {
   if (maybeConfig) {
     const config = maybeConfig;
     const strConfig = findConfigString(config) || configToString(config);
-    const pool = pools.find(x => x[0] === strConfig);
+    const pool = pools.find((x) => x[0] === strConfig);
     if (pool) {
       return pool[1];
     } else {
       throw new Error(
-        `No matching pool found for ${config.user}@${config.host}:${
-          config.port
-        }/${config.database}`
+        `No matching pool found for ${config.user}@${config.host}:${config.port}/${config.database}`
       );
     }
   } else {
@@ -77,16 +75,14 @@ export function getPool(maybeConfig?: IDbConfig): pg.Pool {
 export async function endPool(config: IDbConfig) {
   if (config) {
     const strConfig = findConfigString(config) || configToString(config);
-    const pool = pools.find(x => x[0] === strConfig);
+    const pool = pools.find((x) => x[0] === strConfig);
     if (pool) {
       await pool[1].end();
       removeFromConfigStringCache(config);
       removeFromPool(pool[1]);
     } else {
       throw new Error(
-        `No matching pool found for ${config.user}@${config.host}:${
-          config.port
-        }/${config.database}`
+        `No matching pool found for ${config.user}@${config.host}:${config.port}/${config.database}`
       );
     }
   } else {

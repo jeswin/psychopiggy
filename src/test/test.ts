@@ -1,9 +1,8 @@
 import "mocha";
-import pg = require("pg");
 import "should";
-import * as psychopiggy from "../";
-
-const shouldLib = require("should");
+import pg from "pg";
+import * as psychopiggy from "../index.js";
+import should from "should";
 
 if (
   [
@@ -11,8 +10,8 @@ if (
     process.env.PSYCHOPIGGY_HOST,
     process.env.PSYCHOPIGGY_PASSWORD,
     process.env.PSYCHOPIGGY_PORT,
-    process.env.PSYCHOPIGGY_USER
-  ].some(x => typeof x === "undefined")
+    process.env.PSYCHOPIGGY_USER,
+  ].some((x) => typeof x === "undefined")
 ) {
   // tslint:disable:max-line-length
   throw new Error(
@@ -28,21 +27,16 @@ const config = {
   port: process.env.PSYCHOPIGGY_PORT
     ? parseInt(process.env.PSYCHOPIGGY_PORT, 10)
     : 5432,
-  user: process.env.PSYCHOPIGGY_USER as string
+  user: process.env.PSYCHOPIGGY_USER as string,
 };
-
-function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 describe("psychopiggy", () => {
   // Create a database
   before(async function resetDb() {
     const pool = new pg.Pool({ ...config, database: "template1" });
 
-    const {
-      rows: existingDbRows
-    } = await pool.query(`SELECT 1 AS result FROM pg_database
+    const { rows: existingDbRows } =
+      await pool.query(`SELECT 1 AS result FROM pg_database
     WHERE datname='${config.database}'`);
 
     if (existingDbRows.length) {
@@ -71,7 +65,7 @@ describe("psychopiggy", () => {
 
   it("returns Params", async () => {
     const params = new psychopiggy.Params({ username: "jeswin" });
-    shouldLib.exist(params);
+    should.exist(params);
   });
 
   it("creates a pool", async () => {
@@ -114,7 +108,7 @@ describe("psychopiggy", () => {
     const params = new psychopiggy.Params({
       email: "jeswin@example.com",
       password: "helloworld",
-      username: "jeswin"
+      username: "jeswin",
     });
     const { rows } = await pool.query(
       `INSERT INTO account (${params.columns()}) VALUES (${params.ids()})`,
@@ -132,11 +126,11 @@ describe("psychopiggy", () => {
     );
 
     const result = (await psychopiggy.withClient(
-      async client => await client.query(`SELECT * FROM account`),
+      async (client) => await client.query(`SELECT * FROM account`),
       config
     )) as any;
 
-    shouldLib.exist(result);
+    should.exist(result);
 
     result.rows.length.should.equal(1);
     result.rows[0].username.should.equal("jeswin");
@@ -151,18 +145,18 @@ describe("psychopiggy", () => {
       username, password, email) VALUES ('jeswin', 'secretive', 'jeswin@example.com')`
     );
 
-    await psychopiggy.withTransaction(async client => {
+    await psychopiggy.withTransaction(async (client) => {
       await client.query(`INSERT INTO account (
         username, password, email) VALUES ('jeswin1', 'secretive1', 'jeswin1@example.com')`);
       await client.query(`INSERT INTO account (
           username, password, email) VALUES ('jeswin2', 'secretive2', 'jeswin2@example.com')`);
     }, config);
 
-    const result = (await psychopiggy.withClient(async client => {
+    const result = (await psychopiggy.withClient(async (client) => {
       return await client.query(`SELECT * FROM account`);
     }, config)) as any;
 
-    shouldLib.exist(result);
+    should.exist(result);
 
     result.rows.length.should.equal(3);
     result.rows[0].username.should.equal("jeswin");
@@ -179,16 +173,16 @@ describe("psychopiggy", () => {
       username, password, email) VALUES ('jeswin', 'secretive', 'jeswin@example.com')`
     );
 
-    const txResult = await psychopiggy.withTransaction(async client => {
+    const txResult = await psychopiggy.withTransaction(async (client) => {
       return client.query(`INSERT INTO account (
         username, password, email) VALUES ('jeswin', 'secretive', 'jpk@example.com')`);
     }, config);
 
-    const result = (await psychopiggy.withClient(async client => {
+    const result = (await psychopiggy.withClient(async (client) => {
       return await client.query(`SELECT * FROM account`);
     }, config)) as any;
 
-    shouldLib.exist(result);
+    should.exist(result);
 
     txResult.success.should.be.false();
     result.rows.length.should.equal(1);
